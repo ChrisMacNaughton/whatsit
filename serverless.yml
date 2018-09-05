@@ -3,6 +3,7 @@ provider:
   name: aws
   runtime: python3.6
   memorySize: 128
+  region: eu-central-1
 plugins:
   - serverless-rust
 custom:
@@ -26,16 +27,25 @@ functions:
             parameters:
               paths:
                 name: true
-  goodbye:
-    handler: liblambda.goodbye
+  ip:
+    handler: liblambda.ip
     package:
       include:
         - liblambda.so
     events:
       - http:
-          path: '/goodbye/{name}'
+          path: '/ip'
           method: GET
-          request:
-            parameters:
-              paths:
-                name: true
+  # goodbye:
+  #   handler: liblambda.goodbye
+  #   package:
+  #     include:
+  #       - liblambda.so
+  #   events:
+  #     - http:
+  #         path: '/goodbye/{name}'
+  #         method: GET
+  #         request:
+  #           parameters:
+  #             paths:
+  #               name: true

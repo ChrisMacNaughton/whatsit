@@ -3,12 +3,11 @@ extern crate cpython;
 #[macro_use]
 extern crate lando;
 
-// extends http::Request type with api gateway info
-use lando::RequestExt;
+use lando::{Response, RequestExt};
 
 gateway!(
     "hello" => |request, _| {
-        println!("{:?}", request.path_parameters());
+        println!("{:?}", request);
         Ok(lando::Response::new(format!(
             "hello {}",
             request
@@ -18,15 +17,11 @@ gateway!(
                 .unwrap_or_else(|| "stranger".to_owned())
         )))
     },
-    "goodbye" => |request, _| {
-        println!("{:?}", request.path_parameters());
-        Ok(lando::Response::new(format!(
-            "goodbye {}",
-            request
-                .path_parameters()
-                .get("name")
-                .cloned()
-                .unwrap_or_else(|| "stranger".to_owned())
-        )))
-    }
+    "ip" => |request, _context| {
+        let mut response = Response::builder();
+        response.header("content-type", "text/plain");
+        let response = response.body(request.request_context().identity.source_ip)?;
+
+        Ok(response)
+    },
 );
