@@ -37,22 +37,36 @@ mod tests {
         assert!(headers.get("x-forwarded-port").is_none());
         assert_eq!(headers.get("host").unwrap(), "test");
     }
+
+    #[test]
+    fn it_gives_ip() {
+        let request = http::Request::builder().body("".into()).unwrap();
+        let ip = ip(&request);
+        assert_eq!(ip, "");
+    }
+
+    #[test]
+    fn it_gives_all() {
+        let mut request = http::Request::builder();
+        request.header("host", "test");
+        request.header("x-forwarded-port", "blah");
+        let all_data = all(&request.body("".into()).unwrap()).unwrap();
+        assert_eq!(all_data["ip"], "");
+        let headers = &all_data["headers"];
+        assert!(headers.get("x-forwarded-port").is_none());
+        assert_eq!(headers.get("host").unwrap(), "test");
+    }
 }
 
 gateway!(
     "ip" => ip_req,
     "headers" => headers_req,
-    "all" => all,
+    "all" => all_req,
 );
 
-fn all(request: Request, _context: LambdaContext) -> Result<Response<String>, Box<std::error::Error>> {
-    let body = json!({
-        "ip": ip(&request),
-        "headers": filtered_headers(&request)?,
-    });
-
+fn all_req(request: Request, _context: LambdaContext) -> Result<Response<String>, Box<std::error::Error>> {
     let mut response = Response::builder();
-    let response = response.body(body.to_string())?;
+    let response = response.body(all(&request)?.to_string())?;
 
     Ok(response)
 }
@@ -70,6 +84,13 @@ fn headers_req(request: Request, _context: LambdaContext) -> Result<Response<Str
         let response = response.body(filtered_headers(&request)?.to_string())?;
 
         Ok(response)
+}
+
+fn all(request: &Request) -> Result<serde_json::Value, Box<std::error::Error>> {
+    Ok(json!({
+        "ip": ip(&request),
+        "headers": filtered_headers(&request)?,
+    }))
 }
 
 fn ip(request: &Request) -> String {
