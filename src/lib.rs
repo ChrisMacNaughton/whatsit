@@ -72,6 +72,10 @@ fn headers_req(request: Request, _context: LambdaContext) -> Result<Response<Str
         Ok(response)
 }
 
+fn ip(request: &Request) -> String {
+    request.request_context().identity.source_ip
+}
+
 fn filtered_headers(request: &Request) -> Result<serde_json::Value, Box<std::error::Error>> {
     let mut headers = serde_json::map::Map::new();
     for header in request.headers() {
@@ -82,8 +86,4 @@ fn filtered_headers(request: &Request) -> Result<serde_json::Value, Box<std::err
         }
     }
     Ok(serde_json::Value::Object(headers))
-}
-
-fn ip(request: &Request) -> String {
-    request.request_context().identity.source_ip
 }

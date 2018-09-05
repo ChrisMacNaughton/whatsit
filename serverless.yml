@@ -32,16 +32,12 @@ functions:
       - http:
           path: '/ip'
           method: GET
-  # goodbye:
-  #   handler: liblambda.goodbye
-  #   package:
-  #     include:
-  #       - liblambda.so
-  #   events:
-  #     - http:
-  #         path: '/goodbye/{name}'
-  #         method: GET
-  #         request:
-  #           parameters:
-  #             paths:
-  #               name: true
+  headers:
+    handler: liblambda.headers
+    package:
+      include:
+        - liblambda.so
+    events:
+      - http:
+          path: '/headers'
+          method: GET
