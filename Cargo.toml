@@ -8,5 +8,7 @@ crate-type = ["cdylib"]
 name = "lambda"
 
 [dependencies]
+serde_json = "1.0"
 lando = "0.1"
+http = "0.1.10"
 cpython = "0.1"
