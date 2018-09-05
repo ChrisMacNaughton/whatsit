@@ -3,6 +3,7 @@ extern crate cpython;
 #[macro_use]
 extern crate lando;
 extern crate http;
+#[macro_use]
 extern crate serde_json;
 
 use lando::{LambdaContext, Response, Request, RequestExt};
@@ -39,32 +40,40 @@ mod tests {
 }
 
 gateway!(
-    "hello" => |request, _| {
-        println!("{:?}", request);
-        Ok(lando::Response::new(format!(
-            "hello {}",
-            request
-                .path_parameters()
-                .get("name")
-                .cloned()
-                .unwrap_or_else(|| "stranger".to_owned())
-        )))
-    },
-    "ip" => |request, _context| {
-        let mut response = Response::builder();
-        response.header("content-type", "text/plain");
-        let response = response.body(request.request_context().identity.source_ip)?;
-
-        Ok(response)
-    },
-    "headers" => headers
+    "ip" => ip_req,
+    "headers" => headers_req,
+    "all" => all,
 );
 
-fn headers(request: Request, _context: LambdaContext) -> Result<Response<String>, Box<std::error::Error>> {
+fn all(request: Request, _context: LambdaContext) -> Result<Response<String>, Box<std::error::Error>> {
+    let body = json!({
+        "ip": ip(&request),
+        "headers": filtered_headers(&request)?,
+    });
+
+    let mut response = Response::builder();
+    let response = response.body(body.to_string())?;
+
+    Ok(response)
+}
+
+fn ip_req(request: Request, _context: LambdaContext) -> Result<Response<String>, Box<std::error::Error>> {
+        let mut response = Response::builder();
+        response.header("content-type", "text/plain");
+        let response = response.body(ip(&request))?;
+
+        Ok(response)
+}
+
+fn headers_req(request: Request, _context: LambdaContext) -> Result<Response<String>, Box<std::error::Error>> {
         let mut response = Response::builder();
         let response = response.body(filtered_headers(&request)?.to_string())?;
 
         Ok(response)
+}
+
+fn ip(request: &Request) -> String {
+    request.request_context().identity.source_ip
 }
 
 fn filtered_headers(request: &Request) -> Result<serde_json::Value, Box<std::error::Error>> {

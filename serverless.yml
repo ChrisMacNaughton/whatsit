@@ -14,19 +14,15 @@ package:
   exclude:
     - ./**
 functions:
-  hello:
-    handler: liblambda.hello
+  all:
+    handler: liblambda.all
     package:
       include:
         - liblambda.so
     events:
       - http:
-          path: '/hello/{name}'
+          path: '/'
           method: GET
-          request:
-            parameters:
-              paths:
-                name: true
   ip:
     handler: liblambda.ip
     package:
@@ -45,16 +41,3 @@ functions:
       - http:
           path: '/headers'
           method: GET
-  # goodbye:
-  #   handler: liblambda.goodbye
-  #   package:
-  #     include:
-  #       - liblambda.so
-  #   events:
-  #     - http:
-  #         path: '/goodbye/{name}'
-  #         method: GET
-  #         request:
-  #           parameters:
-  #             paths:
-  #               name: true
