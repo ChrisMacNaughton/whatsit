@@ -36,6 +36,15 @@ functions:
       - http:
           path: '/ip'
           method: GET
+  headers:
+    handler: liblambda.headers
+    package:
+      include:
+        - liblambda.so
+    events:
+      - http:
+          path: '/headers'
+          method: GET
   # goodbye:
   #   handler: liblambda.goodbye
   #   package:
